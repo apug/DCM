@@ -1,0 +1,45 @@
+# Main Docker Compose file that includes all service configurations
+# Usage:
+#   docker compose up -d              # Start all services
+#   docker compose up -d caddy keycloak postgres  # Start specific services
+#   docker compose down               # Stop all services
+#   docker compose ps                 # View status of all services
+
+services:
+  bootstrap:
+    image: alpine:latest
+    command: >
+      sh -c "
+        echo '🔍 Verifying environment configuration...';
+        echo '';
+        echo 'Checking environment variables:';
+        echo '  DCM_ROOT: ${DCM_ROOT}';
+        echo '  DCM_CONFIG_DIR: ${DCM_CONFIG_DIR}';
+        echo '  DCM_VOLUMES_DIR: ${DCM_VOLUMES_DIR}';
+        echo '';
+        if [ ! -f '/config/config.env' ]; then
+          echo '❌ ERROR: config.env file not found at ${DCM_CONFIG_DIR}/config.env';
+          echo '';
+          echo 'Please run: make config';
+          exit 1;
+        fi;
+        echo '✅ config.env file found at ${DCM_CONFIG_DIR}/config.env';
+        echo '';
+        echo '✅ All checks passed - starting services...';
+        exit 0;
+      "
+    environment:
+      REQUIRED_CHECK: ${DCM_ROOT?} ${DCM_CONFIG_DIR?} ${DCM_VOLUMES_DIR?}
+    volumes:
+      - ${DCM_CONFIG_DIR}:/config:ro,z
+include:
+  - .dcm/services/compose/services.yml
+# Networks are defined as external in individual service compose files
+# Ensure these networks exist before starting services:
+#   docker network create caddy
+#   docker network create database
+networks:
+  db:
+    driver: bridge
+  web:
+    driver: bridge

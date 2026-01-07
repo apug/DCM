@@ -1,0 +1,191 @@
+name: dcm
+help: Docker Collection Manager
+version: 0.1.0
+
+commands:
+  - name: init
+    help: Initialize DockManager directories (repos, services/config, services/volumes, services/compose)
+
+  - name: repo
+    help: Manage git repositories
+
+    commands:
+      - name: add
+        help: Clone a git repository into the repos directory
+        args:
+          - name: url
+            required: true
+            help: Git repository URL
+
+        flags:
+          - long: --branch
+            short: -b
+            arg: branch
+            help: Specific branch to clone
+
+      - name: rm
+        help: Remove a repository from the repos directory
+        args:
+          - name: name
+            required: true
+            help: Name of the repository to remove
+
+      - name: list
+        help: List all repositories in the repos directory
+
+      - name: update
+        help: Update repositories (git pull). Updates all repos if no names specified
+        args:
+          - name: repos
+            required: false
+            repeatable: true
+            help: Repository names to update (updates all if not specified)
+
+  - name: service
+    help: Manage docker services
+
+    commands:
+      - name: enable
+        help: Enable services by adding them to services/compose/services.yml
+        args:
+          - name: services
+            required: false
+            repeatable: true
+            help: Service names in format RepoName/ServiceName (e.g., Base/Caddy). If not specified, enables all available services.
+        flags:
+          - long: --interactive
+            short: -i
+            help: Interactively prompt for each available service
+
+      - name: disable
+        help: Disable services by removing them from services/compose/services.yml
+        args:
+          - name: services
+            required: false
+            repeatable: true
+            help: Service names in format RepoName/ServiceName (e.g., Base/Caddy) to disable.
+        flags:
+          - long: --all
+            short: -a
+            help: Disable all currently enabled services
+
+      - name: config
+        help: Configure services by executing their config.sh scripts and merging to services/config/config.env
+        args:
+          - name: services
+            required: false
+            repeatable: true
+            help: Service names in format RepoName/ServiceName (e.g., Base/Postgres). If not specified, configures all enabled services.
+
+      - name: status
+        help: Show status of services in tabular format
+        flags:
+          - long: --all
+            short: -a
+            help: Show all services including disabled ones
+
+      - name: up
+        help: Start all or specific services
+        args:
+          - name: services
+            required: false
+            repeatable: true
+            help: Docker service names to start (starts all if not specified)
+        flags:
+          - long: --build
+            short: -b
+            help: Rebuild images before starting (only affects services with a Dockerfile)
+
+      - name: down
+        help: Stop all or specific services
+        args:
+          - name: services
+            required: false
+            repeatable: true
+            help: Docker service names to stop (stops all if not specified)
+
+      - name: restart
+        help: Restart all or specific services
+        args:
+          - name: services
+            required: false
+            repeatable: true
+            help: Docker service names to restart (restarts all if not specified)
+
+      - name: logs
+        help: Follow logs for specific services
+        args:
+          - name: services
+            required: true
+            repeatable: true
+            help: Docker service names to show logs for
+
+      - name: shell
+        help: Open bash shell in container
+        args:
+          - name: container
+            required: true
+            help: Container name to open shell in
+
+  - name: caddy
+    help: Manage Caddy reverse proxy configuration
+
+    commands:
+      - name: add
+        help: Add or update a user snippet in Caddyfile.Before or Caddyfile.After
+        args:
+          - name: name
+            required: true
+            help: Name/label for the snippet (used in BEGIN/END markers)
+        flags:
+          - long: --file
+            short: -f
+            arg: file
+            help: Read snippet from file instead of opening editor
+          - long: --target
+            short: -t
+            arg: target
+            help: "Target file: before or after (default: prompt)"
+
+      - name: service-add
+        help: Add or update a user-defined route snippet in Caddyfile.Services
+        args:
+          - name: name
+            required: true
+            help: Name/label for the route snippet (used in BEGIN/END markers)
+        flags:
+          - long: --file
+            short: -f
+            arg: file
+            help: Read snippet from file instead of opening editor
+
+      - name: reverse-proxy
+        alias: rp
+        help: Add a reverse proxy route to Caddyfile.Before or Caddyfile.After
+        args:
+          - name: domain
+            required: true
+            help: Domain to serve (e.g. app.example.com)
+          - name: target
+            required: true
+            help: Upstream target (e.g. localhost:8080 or container:3000)
+        flags:
+          - long: --target
+            short: -t
+            arg: target
+            help: "Target file: after (default) or before"
+
+  - name: core
+    help: Manage the dcm core repo (_dcm)
+
+    commands:
+      - name: version
+        help: Show current core version and check for updates
+
+      - name: update
+        help: Update the core repo to the latest version
+        flags:
+          - long: --branch
+            short: -b
+            arg: branch
+            help: Pull the latest commit from a specific branch instead of the latest tag

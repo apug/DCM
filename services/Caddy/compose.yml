@@ -1,0 +1,29 @@
+include:
+  - ${DCM_CONFIG_DIR}/_dcm/Caddy/volumes.yml
+
+services:
+  caddy:
+    depends_on:
+      bootstrap:
+        condition: service_completed_successfully
+    build:
+      dockerfile: Dockerfile
+      context: .
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    env_file:
+      - "${DCM_CONFIG_DIR}/config.env"
+      # - "${DCM_CONFIG_DIR}/_dcm/Caddy/caddy.env"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:z
+      - ${DCM_CONFIG_DIR}/_dcm/Caddy/Caddyfile.Before:/etc/caddy/Caddyfile.Before:z
+      - ${DCM_CONFIG_DIR}/_dcm/Caddy/Caddyfile.Services:/etc/caddy/Caddyfile.Services:z
+      - ${DCM_CONFIG_DIR}/_dcm/Caddy/Caddyfile.After:/etc/caddy/Caddyfile.After:z
+      - ${DCM_VOLUMES_DIR}/_dcm/Caddy/static:/var/www:z
+      - ${DCM_VOLUMES_DIR}/_dcm/Caddy/data:/data:z
+      - ${DCM_VOLUMES_DIR}/_dcm/Caddy/config:/config:z
+    networks:
+      - web

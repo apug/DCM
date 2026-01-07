@@ -1,0 +1,68 @@
+# Create DockManager directories
+BASEDIR=$PWD/.dcm/services
+mkdir -p repos "$BASEDIR/config" "$BASEDIR/volumes" "$BASEDIR/compose"
+
+# Resolve real UID/GID (UID is read-only in bash, use id command)
+CURRENT_UID=$(id -u)
+CURRENT_GID=$(id -g)
+
+# Create .env file with DCM_* variables (absolute paths)
+cat >.env <<EOF
+DCM_ROOT=$BASEDIR
+DCM_CONFIG_DIR=$BASEDIR/config
+DCM_VOLUMES_DIR=$BASEDIR/volumes
+DCM_UID=$CURRENT_UID
+DCM_GID=$CURRENT_GID
+DCM_PROXY_SERVICE=_dcm/Caddy
+EOF
+
+msg_success "DockManager initialized successfully!"
+echo ""
+msg_info "Created directories:"
+echo "  - $PWD/repos/             (for git repositories)"
+echo "  - $BASEDIR/config/   (for configuration files)"
+echo "  - $BASEDIR/volumes/  (for docker volumes)"
+echo "  - $BASEDIR/compose/  (for compose files and services.yml)"
+echo ""
+msg_info "Created .env file with:"
+echo "  - DCM_ROOT=$BASEDIR"
+echo "  - DCM_CONFIG_DIR=$BASEDIR/config"
+echo "  - DCM_VOLUMES_DIR=$BASEDIR/volumes"
+echo "  - DCM_UID=$CURRENT_UID"
+echo "  - DCM_GID=$CURRENT_GID"
+echo "  - DCM_PROXY_SERVICE=_dcm/Caddy"
+echo ""
+
+# Initialize services.yml and auto-enable all built-in services
+if [ ! -f "$DCM_SERVICES_FILE" ]; then
+  echo "include:" > "$DCM_SERVICES_FILE"
+fi
+
+echo ""
+msg_info "Enabling built-in services..."
+
+for compose_file in $DCM_BUILTIN_SERVICES/*/compose.yml; do
+  [ -f "$compose_file" ] || continue
+  service=$(basename "$(dirname "$compose_file")")
+  service_name="_dcm/$service"
+  include_path="${DCM_INCLUDE_PREFIX}$DCM_BUILTIN_SERVICES/$service/compose.yml"
+
+  if grep -qF "  - $include_path" "$DCM_SERVICES_FILE" 2>/dev/null; then
+    msg_warning "Built-in service '$service_name' already enabled"
+    continue
+  fi
+
+  echo "  - $include_path" >> "$DCM_SERVICES_FILE"
+
+  containers=()
+  while IFS= read -r container; do
+    [ -n "$container" ] && containers+=("$container")
+  done < <(grep -A 100 "^services:" "$compose_file" | grep "^  [a-zA-Z0-9_-]\+:" | awk '{print $1}' | sed 's/:$//')
+
+  service_config_enable "$service_name" "${containers[@]}"
+  caddy_add_service "$service_name"
+  msg_success "Enabled built-in service: $service_name"
+done
+
+echo ""
+msg_info "Run 'dcm service config' to complete the configuration."
