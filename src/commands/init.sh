@@ -16,6 +16,12 @@ DCM_GID=$CURRENT_GID
 DCM_PROXY_SERVICE=_dcm/Caddy
 EOF
 
+# Generate compose.yml if not present
+if [ ! -f "compose.yml" ]; then
+  write_compose_yml
+  msg_success "compose.yml created."
+fi
+
 msg_success "DockManager initialized successfully!"
 echo ""
 msg_info "Created directories:"
