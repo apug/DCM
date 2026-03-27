@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install bashly
-        run: gem install bashly
+        run: sudo gem install bashly
 
       - name: Generate dcm executable
         run: |
