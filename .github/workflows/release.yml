@@ -21,7 +21,9 @@ jobs:
         run: sudo gem install bashly
 
       - name: Set version from tag
-        run: sed -i "s/^version:.*/version: ${{ github.ref_name }}/" src/bashly.yml
+        env:
+          TAG: ${{ github.ref_name }}
+        run: sed -i "s/^version:.*/version: ${TAG}/" src/bashly.yml
 
       - name: Generate dcm executable
         run: |
