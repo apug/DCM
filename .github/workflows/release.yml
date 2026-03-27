@@ -20,6 +20,9 @@ jobs:
       - name: Install bashly
         run: sudo gem install bashly
 
+      - name: Set version from tag
+        run: sed -i "s/^version:.*/version: ${{ github.ref_name }}/" src/bashly.yml
+
       - name: Generate dcm executable
         run: |
           bashly generate
