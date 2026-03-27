@@ -1,6 +1,6 @@
 name: dcm
 help: Docker Collection Manager
-version: 0.1.0
+version: dev
 
 commands:
   - name: init
@@ -174,6 +174,9 @@ commands:
             short: -t
             arg: target
             help: "Target file: after (default) or before"
+
+  - name: self-update
+    help: Update dcm to the latest released version
 
   - name: core
     help: Manage the dcm core repo (_dcm)

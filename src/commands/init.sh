@@ -33,6 +33,19 @@ echo "  - DCM_GID=$CURRENT_GID"
 echo "  - DCM_PROXY_SERVICE=_dcm/Caddy"
 echo ""
 
+# Download built-in services if missing
+if [ ! -d "$DCM_BUILTIN_SERVICES" ]; then
+  DCM_VERSION=$("$0" --version)
+  SERVICES_URL="https://github.com/$DCM_GITHUB_REPO/releases/download/$DCM_VERSION/services.tgz"
+  msg_info "Built-in services not found. Downloading $DCM_VERSION..."
+  if ! curl -fsSL "$SERVICES_URL" | tar -xz; then
+    msg_error "Failed to download services from $SERVICES_URL"
+    exit 1
+  fi
+  msg_success "Built-in services downloaded."
+  echo ""
+fi
+
 # Initialize services.yml and auto-enable all built-in services
 if [ ! -f "$DCM_SERVICES_FILE" ]; then
   echo "include:" > "$DCM_SERVICES_FILE"

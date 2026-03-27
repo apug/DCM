@@ -1,5 +1,6 @@
 ## Path constants and initialization checks for DockManager
 
+DCM_GITHUB_REPO="apug/DCM"
 DCM_BUILTIN_SERVICES="services"
 
 DCM_DIR=".dcm"
