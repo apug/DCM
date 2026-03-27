@@ -177,18 +177,3 @@ commands:
 
   - name: self-update
     help: Update dcm to the latest released version
-
-  - name: core
-    help: Manage the dcm core repo (_dcm)
-
-    commands:
-      - name: version
-        help: Show current core version and check for updates
-
-      - name: update
-        help: Update the core repo to the latest version
-        flags:
-          - long: --branch
-            short: -b
-            arg: branch
-            help: Pull the latest commit from a specific branch instead of the latest tag

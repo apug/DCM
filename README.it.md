@@ -142,18 +142,6 @@ dcm self-update
 
 ---
 
-### `dcm core`
-
-Gestisce la versione del progetto dcm (tag git).
-
-```bash
-dcm core version           # Mostra versione corrente e ultima disponibile
-dcm core update            # Aggiorna all'ultimo tag di release
-dcm core update --branch   # Aggiorna all'ultimo commit di un branch
-```
-
----
-
 ## Struttura del progetto
 
 Dopo `dcm init`, la directory avrà questa struttura:
