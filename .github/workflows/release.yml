@@ -12,11 +12,13 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    container: dannyben/bashly
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install bashly
+        run: gem install bashly
 
       - name: Generate dcm executable
         run: |
