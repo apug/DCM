@@ -102,71 +102,25 @@ disable_service() {
   msg_success "Disabled service: $service_name"
 }
 
-# Get services to enable
-if [ -n "${args[--interactive]}" ]; then
-  # Interactive mode: prompt for each service, showing current state
-  all_services=($(get_all_services))
-
-  if [ ${#all_services[@]} -eq 0 ]; then
-    echo "No services found in repos/*/services/"
-    exit 0
+# Helper: check if a service is currently enabled
+_is_enabled() {
+  local service_name="$1"
+  local repo=$(echo "$service_name" | cut -d'/' -f1)
+  local svc=$(echo "$service_name" | cut -d'/' -f2)
+  local compose_path
+  if [ "$repo" = "_dcm" ]; then
+    compose_path="$DCM_BUILTIN_SERVICES/$svc/compose.yml"
+  else
+    compose_path="repos/$repo/services/$svc/compose.yml"
   fi
+  grep -qF "  - ${DCM_INCLUDE_PREFIX}$compose_path" "$DCM_SERVICES_FILE" 2>/dev/null
+}
 
-  enabled_count=0
-  disabled_count=0
-
-  for service_name in "${all_services[@]}"; do
-    local_repo=$(echo "$service_name" | cut -d'/' -f1)
-    local_svc=$(echo "$service_name" | cut -d'/' -f2)
-
-    # Skip built-in services — they are always enabled automatically
-    if [ "$local_repo" = "_dcm" ]; then
-      continue
-    fi
-
-    if [ "$local_repo" = "_dcm" ]; then
-      local_compose_path="$DCM_BUILTIN_SERVICES/$local_svc/compose.yml"
-    else
-      local_compose_path="repos/$local_repo/services/$local_svc/compose.yml"
-    fi
-    local_include_path="${DCM_INCLUDE_PREFIX}$local_compose_path"
-    currently_enabled=false
-    if grep -qF "  - $local_include_path" "$DCM_SERVICES_FILE"; then
-      currently_enabled=true
-    fi
-
-    if [ "$currently_enabled" = true ]; then
-      read -p "Enable service '$service_name'? [Y/n]: " response
-      response=${response:-Y}
-    else
-      read -p "Enable service '$service_name'? [y/N]: " response
-      response=${response:-N}
-    fi
-
-    if [[ "$response" =~ ^[Yy]$ ]]; then
-      if [ "$currently_enabled" = false ]; then
-        if enable_service "$service_name"; then
-          enabled_count=$((enabled_count + 1))
-        fi
-      fi
-    else
-      if [ "$currently_enabled" = true ]; then
-        disable_service "$service_name"
-        disabled_count=$((disabled_count + 1))
-      fi
-    fi
-    echo ""
-  done
-
-  regenerate_config_env
-  msg_success "Summary: $enabled_count enabled, $disabled_count disabled"
-elif [ -n "${args[services]}" ]; then
-  # Enable specific services
+if [ -n "${args[services]}" ]; then
+  # Enable specific services directly
   eval "services_to_enable=(${args[services]})"
-
   enabled_count=0
   failed_count=0
-
   for service_name in "${services_to_enable[@]}"; do
     if enable_service "$service_name"; then
       enabled_count=$((enabled_count + 1))
@@ -174,31 +128,74 @@ elif [ -n "${args[services]}" ]; then
       failed_count=$((failed_count + 1))
     fi
   done
-
   echo ""
   regenerate_config_env
   msg_success "Summary: $enabled_count enabled, $failed_count failed"
-else
-  # No services and no --interactive: enable all available services
+
+elif [ -n "${args[--all]}" ]; then
+  # Interactive: prompt for ALL services (can enable or disable)
   all_services=($(get_all_services))
+  [ ${#all_services[@]} -eq 0 ] && { echo "No services found."; exit 0; }
+  enabled_count=0
+  disabled_count=0
+  for service_name in "${all_services[@]}"; do
+    local_repo=$(echo "$service_name" | cut -d'/' -f1)
+    [ "$local_repo" = "_dcm" ] && continue
+    if _is_enabled "$service_name"; then
+      read -p "Keep '$service_name' enabled? [Y/n]: " response
+      response=${response:-Y}
+      if [[ ! "$response" =~ ^[Yy]$ ]]; then
+        disable_service "$service_name"
+        disabled_count=$((disabled_count + 1))
+      fi
+    else
+      read -p "Enable '$service_name'? [y/N]: " response
+      response=${response:-N}
+      if [[ "$response" =~ ^[Yy]$ ]]; then
+        enable_service "$service_name" && enabled_count=$((enabled_count + 1))
+      fi
+    fi
+    echo ""
+  done
+  regenerate_config_env
+  msg_success "Summary: $enabled_count enabled, $disabled_count disabled"
 
-  if [ ${#all_services[@]} -eq 0 ]; then
-    echo "No services found in repos/*/services/"
-    exit 0
-  fi
-
+elif [ -n "${args[--yes]}" ]; then
+  # Non-interactive: enable all disabled services
+  all_services=($(get_all_services))
+  [ ${#all_services[@]} -eq 0 ] && { echo "No services found."; exit 0; }
   enabled_count=0
   failed_count=0
-
   for service_name in "${all_services[@]}"; do
+    local_repo=$(echo "$service_name" | cut -d'/' -f1)
+    [ "$local_repo" = "_dcm" ] && continue
+    _is_enabled "$service_name" && continue
     if enable_service "$service_name"; then
       enabled_count=$((enabled_count + 1))
     else
       failed_count=$((failed_count + 1))
     fi
   done
-
   echo ""
   regenerate_config_env
   msg_success "Summary: $enabled_count enabled, $failed_count failed"
+
+else
+  # Default: interactive, only disabled services
+  all_services=($(get_all_services))
+  [ ${#all_services[@]} -eq 0 ] && { echo "No services found."; exit 0; }
+  enabled_count=0
+  for service_name in "${all_services[@]}"; do
+    local_repo=$(echo "$service_name" | cut -d'/' -f1)
+    [ "$local_repo" = "_dcm" ] && continue
+    _is_enabled "$service_name" && continue
+    read -p "Enable '$service_name'? [Y/n]: " response
+    response=${response:-Y}
+    if [[ "$response" =~ ^[Yy]$ ]]; then
+      enable_service "$service_name" && enabled_count=$((enabled_count + 1))
+    fi
+    echo ""
+  done
+  regenerate_config_env
+  msg_success "Summary: $enabled_count enabled"
 fi

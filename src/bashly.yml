@@ -58,16 +58,19 @@ commands:
 
     commands:
       - name: enable
-        help: Enable services by adding them to services/compose/services.yml
+        help: Enable services interactively or by name
         args:
           - name: services
             required: false
             repeatable: true
-            help: Service names in format RepoName/ServiceName (e.g., Base/Caddy). If not specified, enables all available services.
+            help: Service names to enable directly (e.g. Repo/Service)
         flags:
-          - long: --interactive
-            short: -i
-            help: Interactively prompt for each available service
+          - long: --all
+            short: -a
+            help: Prompt for all services including already-enabled ones
+          - long: --yes
+            short: -y
+            help: Non-interactive — enable all disabled services without prompting
 
       - name: disable
         help: Disable services by removing them from services/compose/services.yml
