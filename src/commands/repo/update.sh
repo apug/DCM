@@ -73,22 +73,24 @@ else
     done
     if [ "$found" = false ]; then
       msg_warning "Removing '$repo_name' (not in repos.yml)..."
-      rm -rf "repos/$repo_name"
-      # Clean up config and services.yml entries
-      config_dir="$DCM_CONFIG_DIR/$repo_name"
-      [ -d "$config_dir" ] && rm -rf "$config_dir"
+
+      # Clean up Caddy and services.yml entries before removing the directory
+      for compose_file in "repos/$repo_name/services/"*/compose.yml; do
+        [ -f "$compose_file" ] || continue
+        service=$(basename "$(dirname "$compose_file")")
+        caddy_remove_service "$repo_name/$service"
+        service_config_disable "$repo_name/$service"
+        any_disabled=$((any_disabled + 1))
+      done
       if [ -f "$DCM_SERVICES_FILE" ]; then
-        while IFS= read -r line; do
-          if [[ "$line" =~ repos/$repo_name/services/([^/]+)/compose\.yml ]]; then
-            service="${BASH_REMATCH[1]}"
-            caddy_remove_service "$repo_name/$service"
-            service_config_disable "$repo_name/$service"
-            any_disabled=$((any_disabled + 1))
-          fi
-        done < "$DCM_SERVICES_FILE"
         grep -v "repos/$repo_name/services/" "$DCM_SERVICES_FILE" > "${DCM_SERVICES_FILE}.tmp"
         mv "${DCM_SERVICES_FILE}.tmp" "$DCM_SERVICES_FILE"
       fi
+
+      rm -rf "repos/$repo_name"
+
+      config_dir="$DCM_CONFIG_DIR/$repo_name"
+      [ -d "$config_dir" ] && rm -rf "$config_dir"
       echo ""
     fi
   done
