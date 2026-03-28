@@ -24,6 +24,7 @@ msg_warning "Removing repository '$name'..."
 rm -rf "repos/$name"
 
 if [ $? -eq 0 ]; then
+  repos_unregister "$name"
   msg_success "Repository '$name' removed successfully!"
 else
   msg_error "Failed to remove repository."

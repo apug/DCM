@@ -30,6 +30,21 @@ commands:
             required: true
             help: Name of the repository to remove
 
+      - name: register
+        help: Register a repository URL in repos.yml without cloning
+        args:
+          - name: url
+            required: true
+            help: Git repository URL
+          - name: directory
+            required: false
+            help: "Custom directory name (default: derived from URL)"
+        flags:
+          - long: --branch
+            short: -b
+            arg: branch
+            help: Branch to track
+
       - name: list
         help: List all repositories in the repos directory
 

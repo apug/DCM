@@ -9,6 +9,7 @@ DCM_COMPOSE_DIR="$DCM_SERVICES_DIR/compose"
 DCM_CONFIG_DIR="$DCM_SERVICES_DIR/config"
 DCM_VOLUMES_DIR="$DCM_SERVICES_DIR/volumes"
 DCM_SERVICES_FILE="$DCM_COMPOSE_DIR/services.yml"
+DCM_REPOS_FILE="$DCM_DIR/repos.yml"
 # Relative path from .dcm/services/compose/ back to project root
 DCM_INCLUDE_PREFIX="../../../"
 

@@ -21,6 +21,7 @@ else
 fi
 
 if [ $? -eq 0 ]; then
+  repos_register "$directory" "$url" "${branch:-}"
   msg_success "Repository cloned successfully!"
   if ! conflicts_check_repo "$directory" "warn"; then
     msg_warning "Enabling conflicting services will cause Docker Compose errors."
