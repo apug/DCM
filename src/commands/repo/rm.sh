@@ -19,6 +19,25 @@ if [ ! -d "repos/$name" ]; then
   exit 1
 fi
 
+# Clean up all service entries BEFORE removing the directory
+# Scan the repo's services directory to find all services (not just enabled ones)
+for compose_file in "repos/$name/services/"*/compose.yml; do
+  [ -f "$compose_file" ] || continue
+  service=$(basename "$(dirname "$compose_file")")
+  caddy_remove_service "$name/$service"
+  service_config_disable "$name/$service"
+done
+
+# Remove services.yml entries for this repository
+if [ -f "$DCM_SERVICES_FILE" ]; then
+  if grep -q "repos/$name/services/" "$DCM_SERVICES_FILE"; then
+    grep -v "repos/$name/services/" "$DCM_SERVICES_FILE" > "${DCM_SERVICES_FILE}.tmp"
+    mv "${DCM_SERVICES_FILE}.tmp" "$DCM_SERVICES_FILE"
+    regenerate_config_env
+    msg_success "Removed service entries from services.yml."
+  fi
+fi
+
 # Remove the repository
 msg_warning "Removing repository '$name'..."
 rm -rf "repos/$name"
@@ -36,24 +55,4 @@ config_dir="$DCM_CONFIG_DIR/$name"
 if [ -d "$config_dir" ]; then
   rm -rf "$config_dir"
   msg_success "Config directory '$config_dir' removed."
-fi
-
-# Remove services.yml entries for this repository
-if [ -f "$DCM_SERVICES_FILE" ]; then
-  removed=0
-  while IFS= read -r line; do
-    if [[ "$line" =~ repos/$name/services/([^/]+)/compose\.yml ]]; then
-      service="${BASH_REMATCH[1]}"
-      caddy_remove_service "$name/$service"
-      service_config_disable "$name/$service"
-      removed=$((removed + 1))
-    fi
-  done < "$DCM_SERVICES_FILE"
-
-  if [ $removed -gt 0 ]; then
-    grep -v "repos/$name/services/" "$DCM_SERVICES_FILE" > "${DCM_SERVICES_FILE}.tmp"
-    mv "${DCM_SERVICES_FILE}.tmp" "$DCM_SERVICES_FILE"
-    regenerate_config_env
-    msg_success "Removed $removed service(s) from services.yml."
-  fi
 fi
