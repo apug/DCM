@@ -62,10 +62,11 @@ else
     fi
   done
 
-  # Remove repos on disk but not in manifest
+  # Remove repos on disk but not in manifest (skip built-in _* dirs)
   for repo_dir in repos/*/; do
     [ -d "$repo_dir" ] || continue
     repo_name=$(basename "$repo_dir")
+    [[ "$repo_name" == _* ]] && continue
     found=false
     for name in "${registered[@]}"; do
       [ "$name" = "$repo_name" ] && found=true && break
