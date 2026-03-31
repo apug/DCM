@@ -16,7 +16,7 @@ _dcm_resolve_workdir() {
       --dir|-d) skip_next=true ;;
     esac
   done
-  echo "${DCM_CONFIG:-${HOME}/.local/dcm}"
+  echo "${DCM_CONFIG:-${HOME}/.local/share/dcm}"
 }
 
 _dcm_workdir="$(_dcm_resolve_workdir)"

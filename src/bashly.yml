@@ -6,7 +6,7 @@ flags:
   - long: --dir
     short: -d
     arg: dir
-    help: "DCM working directory (default: ~/.local/dcm, override with DCM_CONFIG env var)"
+    help: "DCM working directory (default: ~/.local/share/dcm, override with DCM_CONFIG env var)"
 
 commands:
   - name: init
