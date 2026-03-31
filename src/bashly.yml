@@ -2,6 +2,12 @@ name: dcm
 help: Docker Collection Manager
 version: dev
 
+flags:
+  - long: --dir
+    short: -d
+    arg: dir
+    help: "DCM working directory (default: ~/.local/dcm, override with DCM_CONFIG env var)"
+
 commands:
   - name: init
     help: Initialize DockManager directories (repos, services/config, services/volumes, services/compose)
