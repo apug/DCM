@@ -24,7 +24,7 @@ services:
       - ${DCM_CONFIG_DIR}:/config:ro,z
 
 include:
-  - .dcm/services/compose/services.yml
+  - state/services/compose/services.yml
 
 networks:
   db:

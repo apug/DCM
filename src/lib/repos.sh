@@ -1,4 +1,4 @@
-## Repository manifest helpers — manages .dcm/repos.yml
+## Repository manifest helpers — manages state/repos.yml
 
 # Ensure repos.yml exists
 repos_file_init() {

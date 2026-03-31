@@ -42,7 +42,7 @@ curl -fsSL https://raw.githubusercontent.com/apug/DCM/main/install.sh | bash
 ### `dcm init`
 
 Inizializza la struttura del progetto nella directory corrente:
-- Crea `.dcm/` con le directory di configurazione, volumi e compose
+- Crea `state/` con le directory di configurazione, volumi e compose
 - Scrive `.env` con i percorsi assoluti e l'UID/GID corrente
 - Scarica i servizi built-in `services/` da GitHub se non presenti
 - Abilita automaticamente i servizi built-in (es. reverse proxy Caddy)
@@ -159,7 +159,7 @@ mio-progetto/
 │               └── setup/
 │                   ├── config.sh
 │                   └── Caddyfile
-└── .dcm/
+└── state/
     └── services/
         ├── compose/
         │   └── services.yml     # include dei servizi attivi

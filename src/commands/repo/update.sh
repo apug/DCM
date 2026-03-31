@@ -35,7 +35,7 @@ if [ -n "${args[repos]}" ]; then
   done
 else
   # Sync mode: synchronize filesystem with repos.yml
-  msg_info "Syncing repositories from .dcm/repos.yml..."
+  msg_info "Syncing repositories from state/repos.yml..."
   echo ""
 
   # Get registered names

@@ -45,7 +45,7 @@ enable_service() {
     return 1
   fi
 
-  # Build include path (relative to .dcm/services/compose/ directory)
+  # Build include path (relative to state/services/compose/ directory)
   local include_path="${DCM_INCLUDE_PREFIX}$compose_path"
 
   # Check if already enabled

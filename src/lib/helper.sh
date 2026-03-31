@@ -25,7 +25,7 @@ to_pascal_case() {
     }' | tr -d ' '
 }
 
-# Regenerate config.env from all partial files in .dcm/services/config/<repo>/<service>/config.partial
+# Regenerate config.env from all partial files in state/services/config/<repo>/<service>/config.partial
 regenerate_config_env() {
   local config_env="$DCM_CONFIG_DIR/config.env"
 

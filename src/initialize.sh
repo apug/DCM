@@ -27,9 +27,9 @@ cd "$_dcm_workdir" || { printf "Error: cannot change to directory '%s'\n" "$_dcm
 unset _dcm_workdir
 
 # Set config file path (must be after cd)
-declare -g CONFIG_FILE=".dcm/config.ini"
+declare -g CONFIG_FILE="state/config.ini"
 
-# Create .dcm directory if it doesn't exist
-if [ ! -d ".dcm" ]; then
-  mkdir -p ".dcm"
+# Create state directory if it doesn't exist
+if [ ! -d "state" ]; then
+  mkdir -p "state"
 fi

@@ -1,5 +1,5 @@
 # Create DockManager directories
-BASEDIR=$PWD/.dcm/services
+BASEDIR=$PWD/state/services
 mkdir -p repos "$BASEDIR/config" "$BASEDIR/volumes" "$BASEDIR/compose"
 
 # Resolve real UID/GID (UID is read-only in bash, use id command)
