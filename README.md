@@ -21,16 +21,18 @@ This downloads the `dcm` executable into the current directory.
 # 1. Download dcm
 curl -fsSL https://raw.githubusercontent.com/apug/DCM/main/install.sh | bash
 
-# 2. Initialize the project (creates directories, .env, and downloads built-in services)
+# 2. Initialize the project
 ./dcm init
 
-# 3. Add a repository containing services
-./dcm repo add git@github.com:myorg/my-services.git
+# 3. Fetch the catalog of available repositories
+./dcm repo update
 
-# 4. Enable services
-./dcm service enable MyRepo/Postgres MyRepo/Redis
+# 4. Browse available repos and install one
+./dcm repo list --all
+./dcm repo install MyRepo
 
-# 5. Configure and start
+# 5. Enable services, configure and start
+./dcm service enable
 ./dcm service config
 ./dcm service up
 ```
@@ -42,10 +44,11 @@ curl -fsSL https://raw.githubusercontent.com/apug/DCM/main/install.sh | bash
 ### `dcm init`
 
 Initializes the project structure in the current directory:
-- Creates `state/` with config, volumes, and compose directories
+- Creates `state/` with config, volumes, compose, and sources directories
 - Writes `.env` with absolute paths and current UID/GID
 - Downloads built-in `services/` from GitHub if not present
 - Auto-enables built-in services (e.g. Caddy reverse proxy)
+- Creates `state/sources/sources.official` with the bundled official catalog
 
 ```bash
 dcm init
@@ -55,21 +58,63 @@ dcm init
 
 ### `dcm repo`
 
-Manages Git repositories that contain services.
+Manages repositories and the source catalog.
+
+#### Catalog (apt-style)
+
+DCM manages source files that list available repositories. `repo update` fetches
+the `dcm.yml` manifest from each listed repo and caches it locally.
 
 ```bash
-dcm repo add <url> [--branch <branch>]   # Clone a repository into repos/
-dcm repo rm <name>                        # Remove a repository
-dcm repo list                             # List cloned repositories
-dcm repo update [repo...]                 # Pull latest changes (all or specific)
+dcm repo update                        # Fetch manifests from all sources → cache
+dcm repo list                          # List installed repositories
+dcm repo list --all                    # List all available repos (installed + catalog)
+dcm repo install <name>                # Install a repo from the catalog
+dcm repo install <source>/<name>       # Install with explicit source (if name conflicts)
+dcm repo register <url> [--branch]     # Add a repo to sources.local and install it
+dcm repo add-source <url>              # Add an external source file to sources.d/
+dcm repo pull [repos...]               # git pull on installed repos (all or specific)
+dcm repo rm <name>                     # Remove an installed repository
 ```
 
-Examples:
+#### Source files
+
+| File | Description |
+|---|---|
+| `state/sources/sources.official` | Official repos bundled with DCM (updated by `self-update`) |
+| `state/sources/sources.local` | Your own repos added via `repo register` |
+| `state/sources/sources.d/*.yml` | Third-party source files added via `repo add-source` |
+
+#### Examples
+
 ```bash
-dcm repo add git@github.com:myorg/infra.git
-dcm repo add git@github.com:myorg/apps.git --branch staging
+# Install from the official catalog
 dcm repo update
-dcm repo update MyInfra MyApps
+dcm repo list --all
+dcm repo install DCMBase
+
+# Add a private repo (not in any catalog)
+dcm repo register git@github.com:myorg/my-services.git
+dcm repo register git@github.com:myorg/my-services.git --branch staging
+
+# Add a third-party catalog
+dcm repo add-source https://example.com/my-sources.yml
+dcm repo update   # refresh index after adding sources
+
+# Keep installed repos up to date
+dcm repo pull
+dcm repo pull MyRepo OtherRepo
+```
+
+#### Conflict resolution
+
+If the same repo name appears in multiple sources, `repo install <name>` will fail
+and prompt you to use the explicit namespace:
+
+```
+Error: 'DCMBase' found in multiple sources: official, mycorp
+Use: dcm repo install official/DCMBase
+  or dcm repo install mycorp/DCMBase
 ```
 
 ---
@@ -79,9 +124,10 @@ dcm repo update MyInfra MyApps
 Manages Docker services discovered from `repos/*/services/*/compose.yml`.
 
 ```bash
-dcm service enable [services...]    # Enable services (all if none specified)
-dcm service enable -i               # Interactive: prompt for each service
-dcm service disable <services...>   # Disable specific services
+dcm service enable [services...]    # Enable services interactively or by name
+dcm service enable --all            # Prompt for all services (including enabled ones)
+dcm service enable --yes            # Non-interactive: enable all disabled services
+dcm service disable [services...]   # Disable specific services
 dcm service disable --all           # Disable all services
 dcm service config [services...]    # Run config.sh scripts and rebuild config.env
 dcm service status                  # Show enabled services and container state
@@ -134,7 +180,7 @@ All snippets use `# BEGIN` / `# END` markers and are idempotent — running the 
 
 ### `dcm self-update`
 
-Updates the `dcm` executable to the latest released version.
+Updates the `dcm` executable to the latest released version and refreshes `sources.official`.
 
 ```bash
 dcm self-update
@@ -160,6 +206,12 @@ my-project/
 │                   ├── config.sh
 │                   └── Caddyfile
 └── state/
+    ├── repos.yml                # installed repositories manifest
+    ├── sources/
+    │   ├── sources.official     # official catalog (managed by DCM)
+    │   ├── sources.local        # your registered repos
+    │   ├── sources.d/           # third-party source files
+    │   └── cache/               # downloaded repo manifests (dcm.yml)
     └── services/
         ├── compose/
         │   └── services.yml     # active service includes
@@ -171,16 +223,32 @@ my-project/
 
 ## Service Repository Convention
 
-A compatible repository should expose services under `services/ServiceName/`:
+A compatible repository should expose services under `services/ServiceName/` and
+include a `dcm.yml` manifest at the root:
 
 ```
 my-services-repo/
+├── dcm.yml                      # repository manifest (name, summary, services)
 └── services/
     └── Postgres/
         ├── compose.yml          # Docker Compose definition
         └── setup/
             ├── config.sh        # generates config.partial (env vars)
             └── Caddyfile        # optional: Caddy route snippet
+```
+
+#### `dcm.yml` format
+
+```yaml
+name: MyRepo
+summary: Short description (shown in repo list)
+description: |
+  Optional longer description.
+services:
+  - name: Postgres
+    summary: PostgreSQL database
+  - name: Redis
+    summary: Cache and message broker
 ```
 
 ---

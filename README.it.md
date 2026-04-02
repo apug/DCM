@@ -21,16 +21,18 @@ Scarica l'eseguibile `dcm` nella directory corrente.
 # 1. Scarica dcm
 curl -fsSL https://raw.githubusercontent.com/apug/DCM/main/install.sh | bash
 
-# 2. Inizializza il progetto (crea le directory, .env e scarica i servizi built-in)
+# 2. Inizializza il progetto
 ./dcm init
 
-# 3. Aggiungi un repository contenente servizi
-./dcm repo add git@github.com:miaorg/miei-servizi.git
+# 3. Aggiorna il catalogo dei repository disponibili
+./dcm repo update
 
-# 4. Abilita i servizi
-./dcm service enable MioRepo/Postgres MioRepo/Redis
+# 4. Sfoglia il catalogo e installa un repo
+./dcm repo list --all
+./dcm repo install MioRepo
 
-# 5. Configura e avvia
+# 5. Abilita i servizi, configura e avvia
+./dcm service enable
 ./dcm service config
 ./dcm service up
 ```
@@ -42,10 +44,11 @@ curl -fsSL https://raw.githubusercontent.com/apug/DCM/main/install.sh | bash
 ### `dcm init`
 
 Inizializza la struttura del progetto nella directory corrente:
-- Crea `state/` con le directory di configurazione, volumi e compose
+- Crea `state/` con le directory di configurazione, volumi, compose e sources
 - Scrive `.env` con i percorsi assoluti e l'UID/GID corrente
 - Scarica i servizi built-in `services/` da GitHub se non presenti
 - Abilita automaticamente i servizi built-in (es. reverse proxy Caddy)
+- Crea `state/sources/sources.official` con il catalogo ufficiale incluso in DCM
 
 ```bash
 dcm init
@@ -55,21 +58,63 @@ dcm init
 
 ### `dcm repo`
 
-Gestisce i repository Git che contengono servizi.
+Gestisce i repository e il catalogo delle sorgenti.
+
+#### Catalogo in stile apt
+
+DCM gestisce file source che elencano i repository disponibili. `repo update` scarica
+il manifest `dcm.yml` da ogni repo elencato e lo salva nella cache locale.
 
 ```bash
-dcm repo add <url> [--branch <branch>]   # Clona un repository in repos/
-dcm repo rm <nome>                        # Rimuove un repository
-dcm repo list                             # Elenca i repository clonati
-dcm repo update [repo...]                 # Aggiorna (tutti o specifici)
+dcm repo update                        # Scarica i manifest da tutte le sorgenti → cache
+dcm repo list                          # Elenca i repository installati
+dcm repo list --all                    # Elenca tutti i repo disponibili (installati + catalogo)
+dcm repo install <nome>                # Installa un repo dal catalogo
+dcm repo install <sorgente>/<nome>     # Installa con namespace esplicito (in caso di conflitti)
+dcm repo register <url> [--branch]     # Aggiunge un repo a sources.local e lo installa
+dcm repo add-source <url>              # Aggiunge un file source esterno in sources.d/
+dcm repo pull [repos...]               # git pull sui repo installati (tutti o specifici)
+dcm repo rm <nome>                     # Rimuove un repository installato
 ```
 
-Esempi:
+#### File source
+
+| File | Descrizione |
+|---|---|
+| `state/sources/sources.official` | Repo ufficiali inclusi in DCM (aggiornati da `self-update`) |
+| `state/sources/sources.local` | Repo personali aggiunti con `repo register` |
+| `state/sources/sources.d/*.yml` | File source di terze parti aggiunti con `repo add-source` |
+
+#### Esempi
+
 ```bash
-dcm repo add git@github.com:miaorg/infra.git
-dcm repo add git@github.com:miaorg/app.git --branch staging
+# Installa dal catalogo ufficiale
 dcm repo update
-dcm repo update MiaInfra MioApp
+dcm repo list --all
+dcm repo install DCMBase
+
+# Aggiungi un repo privato (non in nessun catalogo)
+dcm repo register git@github.com:miaorg/miei-servizi.git
+dcm repo register git@github.com:miaorg/miei-servizi.git --branch staging
+
+# Aggiungi un catalogo di terze parti
+dcm repo add-source https://example.com/my-sources.yml
+dcm repo update   # aggiorna l'indice dopo aver aggiunto sorgenti
+
+# Mantieni aggiornati i repo installati
+dcm repo pull
+dcm repo pull MioRepo AltroRepo
+```
+
+#### Gestione conflitti di nome
+
+Se lo stesso nome appare in più sorgenti, `repo install <nome>` fallisce
+e chiede di usare il namespace esplicito:
+
+```
+Error: 'DCMBase' found in multiple sources: official, mycorp
+Use: dcm repo install official/DCMBase
+  or dcm repo install mycorp/DCMBase
 ```
 
 ---
@@ -79,12 +124,13 @@ dcm repo update MiaInfra MioApp
 Gestisce i servizi Docker scoperti in `repos/*/services/*/compose.yml`.
 
 ```bash
-dcm service enable [servizi...]     # Abilita servizi (tutti se nessuno specificato)
-dcm service enable -i               # Interattivo: chiede conferma per ogni servizio
-dcm service disable <servizi...>    # Disabilita servizi specifici
+dcm service enable [servizi...]     # Abilita servizi (interattivo o per nome)
+dcm service enable --all            # Chiede conferma per tutti i servizi
+dcm service enable --yes            # Non interattivo: abilita tutti i servizi disabilitati
+dcm service disable [servizi...]    # Disabilita servizi specifici
 dcm service disable --all           # Disabilita tutti i servizi
 dcm service config [servizi...]     # Esegue config.sh e ricostruisce config.env
-dcm service status                  # Mostra stato dei servizi abilitati
+dcm service status                  # Mostra lo stato dei servizi abilitati
 dcm service status --all            # Mostra tutti i servizi inclusi i disabilitati
 dcm service up [servizi...]         # Avvia i servizi
 dcm service down [servizi...]       # Ferma i servizi
@@ -134,7 +180,7 @@ Tutti gli snippet usano marcatori `# BEGIN` / `# END` e sono idempotenti: esegui
 
 ### `dcm self-update`
 
-Aggiorna l'eseguibile `dcm` all'ultima versione rilasciata.
+Aggiorna l'eseguibile `dcm` all'ultima versione rilasciata e sovrascrive `sources.official`.
 
 ```bash
 dcm self-update
@@ -160,6 +206,12 @@ mio-progetto/
 │                   ├── config.sh
 │                   └── Caddyfile
 └── state/
+    ├── repos.yml                # manifest dei repository installati
+    ├── sources/
+    │   ├── sources.official     # catalogo ufficiale (gestito da DCM)
+    │   ├── sources.local        # repo personali registrati
+    │   ├── sources.d/           # file source di terze parti
+    │   └── cache/               # manifest scaricati (dcm.yml)
     └── services/
         ├── compose/
         │   └── services.yml     # include dei servizi attivi
@@ -171,16 +223,32 @@ mio-progetto/
 
 ## Convenzioni per i repository di servizi
 
-Un repository compatibile espone i servizi sotto `services/NomeServizio/`:
+Un repository compatibile espone i servizi sotto `services/NomeServizio/` e
+include un manifest `dcm.yml` nella root:
 
 ```
 mio-repo-servizi/
+├── dcm.yml                      # manifest del repository (nome, summary, servizi)
 └── services/
     └── Postgres/
         ├── compose.yml          # definizione Docker Compose
         └── setup/
             ├── config.sh        # genera config.partial (variabili d'ambiente)
             └── Caddyfile        # opzionale: snippet di route Caddy
+```
+
+#### Formato `dcm.yml`
+
+```yaml
+name: MioRepo
+summary: Descrizione breve (mostrata in repo list)
+description: |
+  Descrizione lunga opzionale.
+services:
+  - name: Postgres
+    summary: Database PostgreSQL
+  - name: Redis
+    summary: Cache e message broker
 ```
 
 ---
