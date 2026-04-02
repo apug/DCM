@@ -40,11 +40,9 @@ echo "  - DCM_GID=$CURRENT_GID"
 echo "  - DCM_PROXY_SERVICE=_dcm/Caddy"
 echo ""
 
-# Create sources.official if not present
-if [ ! -f "$DCM_SOURCES_OFFICIAL" ]; then
-  sources_write_official
-  msg_success "sources.official created."
-fi
+# Always overwrite sources.official to keep it in sync with this DCM version
+sources_write_official
+msg_success "sources.official updated."
 
 # Download built-in services if missing
 if [ ! -d "$DCM_BUILTIN_SERVICES" ]; then

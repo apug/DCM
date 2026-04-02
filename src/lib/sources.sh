@@ -9,6 +9,12 @@ sources_write_official() {
 # This file is managed by DCM. Do not edit manually.
 # Add your own repositories with: dcm repo register <url>
 # Add third-party sources with:   dcm repo add-source <url>
+
+- name: DcmBase
+  url: git@github.com:apug/DcmBase.git
+
+- name: DcmPhp
+  url: git@github.com:apug/DcmPhp.git
 EOF
 }
 
@@ -25,11 +31,11 @@ sources_name_from_file() {
 
 # List all source files in load order: official, local, extras
 sources_list_files() {
-  [ -f "$DCM_SOURCES_OFFICIAL" ] && echo "$DCM_SOURCES_OFFICIAL"
-  [ -f "$DCM_SOURCES_LOCAL" ]    && echo "$DCM_SOURCES_LOCAL"
+  if [ -f "$DCM_SOURCES_OFFICIAL" ]; then echo "$DCM_SOURCES_OFFICIAL"; fi
+  if [ -f "$DCM_SOURCES_LOCAL" ]; then echo "$DCM_SOURCES_LOCAL"; fi
   if [ -d "$DCM_SOURCES_EXTRA_DIR" ]; then
     for f in "$DCM_SOURCES_EXTRA_DIR"/*.yml; do
-      [ -f "$f" ] && echo "$f"
+      if [ -f "$f" ]; then echo "$f"; fi
     done
   fi
 }
@@ -63,6 +69,7 @@ sources_parse_file() {
   if [ -n "$name" ] && [ -n "$url" ]; then
     echo "$source_name|$name|$url|$branch"
   fi
+  return 0
 }
 
 # Get all entries from all source files: source|name|url|branch
@@ -89,9 +96,13 @@ sources_find() {
 
   sources_get_all_entries | while IFS='|' read -r src name url branch; do
     if [ -n "$filter_source" ]; then
-      [ "$src" = "$filter_source" ] && [ "$name" = "$filter_name" ] && echo "$src|$name|$url|$branch"
+      if [ "$src" = "$filter_source" ] && [ "$name" = "$filter_name" ]; then
+        echo "$src|$name|$url|$branch"
+      fi
     else
-      [ "$name" = "$filter_name" ] && echo "$src|$name|$url|$branch"
+      if [ "$name" = "$filter_name" ]; then
+        echo "$src|$name|$url|$branch"
+      fi
     fi
   done
 }
@@ -142,8 +153,16 @@ sources_raw_url() {
       local path="${url#https://github.com/}"
       echo "https://raw.githubusercontent.com/$path/$branch/$file"
       ;;
+    git@github.com:*)
+      local path="${url#git@github.com:}"
+      echo "https://raw.githubusercontent.com/$path/$branch/$file"
+      ;;
     https://gitlab.com/*)
       echo "$url/-/raw/$branch/$file"
+      ;;
+    git@gitlab.com:*)
+      local path="${url#git@gitlab.com:}"
+      echo "https://gitlab.com/$path/-/raw/$branch/$file"
       ;;
     *)
       echo ""
