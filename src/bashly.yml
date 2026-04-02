@@ -11,13 +11,16 @@ flags:
 commands:
   - name: init
     help: Initialize DockManager directories (repos, services/config, services/volumes, services/compose)
+    alias: i
 
   - name: repo
     help: Manage git repositories
+    alias: [r, rep]
 
     commands:
       - name: add
         help: Clone a git repository into the repos directory
+        alias: a*
         args:
           - name: url
             required: true
@@ -31,6 +34,7 @@ commands:
 
       - name: rm
         help: Remove a repository from the repos directory
+        alias: d*
         args:
           - name: name
             required: true
@@ -38,6 +42,7 @@ commands:
 
       - name: register
         help: Register a repository URL in repos.yml without cloning
+        alias: reg
         args:
           - name: url
             required: true
@@ -50,9 +55,10 @@ commands:
 
       - name: list
         help: List all repositories in the repos directory
-
+        alias: [ls, l]
       - name: update
         help: Update repositories (git pull). Updates all repos if no names specified
+        alias: u*
         args:
           - name: repos
             required: false
@@ -61,10 +67,11 @@ commands:
 
   - name: service
     help: Manage docker services
-
+    alias: s*
     commands:
       - name: enable
         help: Enable services interactively or by name
+        alias: e*
         args:
           - name: services
             required: false
@@ -80,6 +87,7 @@ commands:
 
       - name: disable
         help: Disable services by removing them from services/compose/services.yml
+        alias: dis*
         args:
           - name: services
             required: false
@@ -92,6 +100,7 @@ commands:
 
       - name: config
         help: Configure services by executing their config.sh scripts and merging to services/config/config.env
+        alias: c*
         args:
           - name: services
             required: false
@@ -100,6 +109,7 @@ commands:
 
       - name: status
         help: Show status of services in tabular format
+        alias: s*
         flags:
           - long: --all
             short: -a
@@ -107,6 +117,7 @@ commands:
 
       - name: up
         help: Start all or specific services
+        alias: u*
         args:
           - name: services
             required: false
@@ -118,6 +129,7 @@ commands:
             help: Rebuild images before starting (only affects services with a Dockerfile)
 
       - name: down
+        alias: d*
         help: Stop all or specific services
         args:
           - name: services
@@ -126,6 +138,7 @@ commands:
             help: Docker service names to stop (stops all if not specified)
 
       - name: restart
+        alias: r*
         help: Restart all or specific services
         args:
           - name: services
@@ -134,6 +147,7 @@ commands:
             help: Docker service names to restart (restarts all if not specified)
 
       - name: logs
+        alias: l*
         help: Follow logs for specific services
         args:
           - name: services
@@ -143,6 +157,7 @@ commands:
 
       - name: shell
         help: Open bash shell in container
+        alias: sh*
         args:
           - name: container
             required: true
@@ -150,10 +165,12 @@ commands:
 
   - name: caddy
     help: Manage Caddy reverse proxy configuration
+    alias: [c, ca]
 
     commands:
       - name: add
         help: Add or update a user snippet in Caddyfile.Before or Caddyfile.After
+        alias: a*
         args:
           - name: name
             required: true
@@ -170,6 +187,7 @@ commands:
 
       - name: service-add
         help: Add or update a user-defined route snippet in Caddyfile.Services
+        alias: sa*
         args:
           - name: name
             required: true
@@ -198,3 +216,4 @@ commands:
 
   - name: self-update
     help: Update dcm to the latest released version
+    alias: su
