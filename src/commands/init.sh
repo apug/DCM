@@ -1,6 +1,7 @@
 # Create DockManager directories
 BASEDIR=$PWD/state/services
-mkdir -p repos "$BASEDIR/config" "$BASEDIR/volumes" "$BASEDIR/compose"
+mkdir -p repos "$BASEDIR/config" "$BASEDIR/volumes" "$BASEDIR/compose" \
+  "$DCM_SOURCES_DIR" "$DCM_SOURCES_EXTRA_DIR" "$DCM_SOURCES_CACHE_DIR"
 
 # Resolve real UID/GID (UID is read-only in bash, use id command)
 CURRENT_UID=$(id -u)
@@ -38,6 +39,17 @@ echo "  - DCM_UID=$CURRENT_UID"
 echo "  - DCM_GID=$CURRENT_GID"
 echo "  - DCM_PROXY_SERVICE=_dcm/Caddy"
 echo ""
+
+# Create sources.official if not present
+if [ ! -f "$DCM_SOURCES_OFFICIAL" ]; then
+  cat > "$DCM_SOURCES_OFFICIAL" <<'EOF'
+# DCM Official Sources
+# This file is managed by DCM. Do not edit manually.
+# Add your own repositories with: dcm repo register <url>
+# Add third-party sources with:   dcm repo add-source <url>
+EOF
+  msg_success "sources.official created."
+fi
 
 # Download built-in services if missing
 if [ ! -d "$DCM_BUILTIN_SERVICES" ]; then

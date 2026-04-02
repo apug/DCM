@@ -13,6 +13,13 @@ DCM_REPOS_FILE="$DCM_DIR/repos.yml"
 # Relative path from state/services/compose/ back to project root
 DCM_INCLUDE_PREFIX="../../../"
 
+# Sources
+DCM_SOURCES_DIR="$DCM_DIR/sources"
+DCM_SOURCES_OFFICIAL="$DCM_SOURCES_DIR/sources.official"
+DCM_SOURCES_LOCAL="$DCM_SOURCES_DIR/sources.local"
+DCM_SOURCES_EXTRA_DIR="$DCM_SOURCES_DIR/sources.d"
+DCM_SOURCES_CACHE_DIR="$DCM_SOURCES_DIR/cache"
+
 # Verify that dcm has been initialized, exit with error if not.
 # Usage: require_init [--env] [--repos] [--compose] [--config]
 # With no flags, checks .env, repos/ and state/services/compose/.

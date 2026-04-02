@@ -6,11 +6,12 @@ repos_file_init() {
 }
 
 # Add or update a repo entry in repos.yml
-# Usage: repos_register <name> <url> [branch]
+# Usage: repos_register <name> <url> [branch] [source]
 repos_register() {
   local name="$1"
   local url="$2"
   local branch="${3:-}"
+  local source="${4:-}"
 
   repos_file_init
 
@@ -21,6 +22,7 @@ repos_register() {
     echo "- name: $name"
     echo "  url: $url"
     [ -n "$branch" ] && echo "  branch: $branch"
+    [ -n "$source" ] && echo "  source: $source"
   } >> "$DCM_REPOS_FILE"
 }
 
@@ -57,6 +59,18 @@ repos_get_url() {
   awk -v name="$name" '
     /^- name: / { found=($0 == "- name: " name) }
     found && /^  url: / { sub(/^  url: */, ""); print; exit }
+  ' "$DCM_REPOS_FILE"
+}
+
+# Get the source for a registered repo (empty if not set)
+# Usage: repos_get_source <name>
+repos_get_source() {
+  local name="$1"
+  [ -f "$DCM_REPOS_FILE" ] || return 0
+  awk -v name="$name" '
+    /^- name: / { found=($0 == "- name: " name) }
+    found && /^- name: / && $0 != "- name: " name { exit }
+    found && /^  source: / { sub(/^  source: */, ""); print; exit }
   ' "$DCM_REPOS_FILE"
 }
 

@@ -18,19 +18,13 @@ commands:
     alias: [r, rep]
 
     commands:
-      - name: add
-        help: Clone a git repository into the repos directory
-        alias: a*
+      - name: install
+        help: Install a repository from the catalog
+        alias: add
         args:
-          - name: url
+          - name: name
             required: true
-            help: Git repository URL
-
-        flags:
-          - long: --branch
-            short: -b
-            arg: branch
-            help: Specific branch to clone
+            help: "Repository name from the catalog (e.g. DCMBase or official/DCMBase)"
 
       - name: rm
         help: Remove a repository from the repos directory
@@ -41,7 +35,7 @@ commands:
             help: Name of the repository to remove
 
       - name: register
-        help: Register a repository URL in repos.yml without cloning
+        help: Register a repository URL in sources.local and install it
         alias: reg
         args:
           - name: url
@@ -54,16 +48,31 @@ commands:
             help: Branch to track
 
       - name: list
-        help: List all repositories in the repos directory
+        help: List installed repositories (--all to show all available)
         alias: [ls, l]
+        flags:
+          - long: --all
+            short: -a
+            help: Show all repositories available in sources (installed + catalog)
+
       - name: update
-        help: Update repositories (git pull). Updates all repos if no names specified
+        help: Fetch manifests from all sources and refresh the local index
+
+      - name: pull
+        help: git pull on installed repositories
         alias: u*
         args:
           - name: repos
             required: false
             repeatable: true
-            help: Repository names to update (updates all if not specified)
+            help: Repository names to pull (pulls all if not specified)
+
+      - name: add-source
+        help: Add an external source file to sources.d/
+        args:
+          - name: url
+            required: true
+            help: URL of the source file to download
 
   - name: service
     help: Manage docker services
