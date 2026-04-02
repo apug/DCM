@@ -1,6 +1,9 @@
 require_init --env --repos --compose --config
 load_env
 
+# Ensure Caddyfile.Before, Caddyfile.Services, Caddyfile.After exist
+caddy_init_files
+
 # Function to get all enabled services from services.yml
 get_enabled_services() {
   local services=()
