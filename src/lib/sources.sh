@@ -141,46 +141,9 @@ sources_local_unregister() {
   mv "$tmp" "$DCM_SOURCES_LOCAL"
 }
 
-# Build the raw URL to fetch a file from a git repo.
-# Usage: sources_raw_url <git_url> <branch> [file]
-sources_raw_url() {
-  local url="${1%.git}"
-  local branch="${2:-main}"
-  local file="${3:-dcm.yml}"
-
-  case "$url" in
-    https://github.com/*)
-      local path="${url#https://github.com/}"
-      echo "https://raw.githubusercontent.com/$path/$branch/$file"
-      ;;
-    git@github.com:*)
-      local path="${url#git@github.com:}"
-      echo "https://raw.githubusercontent.com/$path/$branch/$file"
-      ;;
-    https://gitlab.com/*)
-      echo "$url/-/raw/$branch/$file"
-      ;;
-    git@gitlab.com:*)
-      local path="${url#git@gitlab.com:}"
-      echo "https://gitlab.com/$path/-/raw/$branch/$file"
-      ;;
-    *)
-      echo ""
-      ;;
-  esac
-}
-
-# Detect the default branch of a remote git repo.
-sources_default_branch() {
-  local url="$1"
-  git ls-remote --symref "$url" HEAD 2>/dev/null \
-    | grep '^ref:' \
-    | sed 's|.*refs/heads/||; s|[[:space:]].*||'
-}
-
 # Fetch and cache the dcm.yml manifest for a repo.
 # For installed repos, reads from the local clone.
-# For others, fetches via raw URL.
+# For others, uses a sparse clone (works with any git server and credentials).
 # Usage: sources_fetch_manifest <source> <name> <url> [branch]
 sources_fetch_manifest() {
   local src="$1"
@@ -197,27 +160,29 @@ sources_fetch_manifest() {
     return 0
   fi
 
-  # Resolve branch
-  if [ -z "$branch" ]; then
-    branch=$(sources_default_branch "$url")
-    [ -z "$branch" ] && branch="main"
+  # Sparse clone to fetch only dcm.yml — works with any git server
+  local tmp_dir
+  tmp_dir=$(mktemp -d)
+
+  local clone_cmd="git clone --depth=1 --filter=blob:none --no-checkout --quiet"
+  if [ -n "$branch" ]; then
+    clone_cmd="$clone_cmd --branch $branch"
   fi
 
-  local raw_url
-  raw_url=$(sources_raw_url "$url" "$branch")
-
-  if [ -z "$raw_url" ]; then
-    msg_warning "Cannot fetch manifest for '$name': unsupported host"
+  if ! $clone_cmd "$url" "$tmp_dir" 2>/dev/null; then
+    rm -rf "$tmp_dir"
+    msg_warning "Cannot reach '$name' ($url)"
     return 1
   fi
 
-  if curl -fsSL "$raw_url" -o "$cache_dir/$name.yml" 2>/dev/null; then
-    return 0
-  else
-    rm -f "$cache_dir/$name.yml"
-    msg_warning "No dcm.yml found for '$name'"
+  if ! git -C "$tmp_dir" checkout HEAD -- dcm.yml 2>/dev/null; then
+    rm -rf "$tmp_dir"
+    msg_warning "No dcm.yml found in '$name'"
     return 1
   fi
+
+  cp "$tmp_dir/dcm.yml" "$cache_dir/$name.yml"
+  rm -rf "$tmp_dir"
 }
 
 # Read a field from a cached manifest.
