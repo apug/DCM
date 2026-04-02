@@ -223,6 +223,24 @@ commands:
             arg: target
             help: "Target file: after (default) or before"
 
+  - name: run
+    help: Run a command provided by a repo
+    args:
+      - name: repo
+        required: true
+        help: Repository name (must exist in repos/)
+      - name: command
+        required: false
+        help: Command to run (filename without .sh extension)
+      - name: args
+        required: false
+        repeatable: true
+        help: Arguments to pass to the command
+    flags:
+      - long: --list
+        short: -l
+        help: List available commands for the repo
+
   - name: self-update
     help: Update dcm to the latest released version
     alias: su
