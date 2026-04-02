@@ -22,6 +22,10 @@ _dcm_resolve_workdir() {
 _dcm_workdir="$(_dcm_resolve_workdir)"
 unset -f _dcm_resolve_workdir
 
+# Resolve the real path of the dcm binary before cd changes CWD
+declare -g DCM_SELF
+DCM_SELF=$(realpath "$0")
+
 mkdir -p "$_dcm_workdir"
 cd "$_dcm_workdir" || { printf "Error: cannot change to directory '%s'\n" "$_dcm_workdir" >&2; exit 1; }
 unset _dcm_workdir

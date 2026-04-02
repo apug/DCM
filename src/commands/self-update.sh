@@ -1,4 +1,4 @@
-current=$("$0" --version)
+current=$("$DCM_SELF" --version)
 
 msg_info "Checking for updates (current: $current)..."
 
@@ -17,7 +17,7 @@ fi
 
 msg_info "New version available: $latest. Updating..."
 
-SELF=$(realpath "$0")
+SELF="$DCM_SELF"
 TMP=$(mktemp)
 
 if ! curl -fsSL "https://github.com/$DCM_GITHUB_REPO/releases/download/$latest/dcm" -o "$TMP"; then

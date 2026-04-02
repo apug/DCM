@@ -80,8 +80,9 @@ for compose_file in $DCM_BUILTIN_SERVICES/*/compose.yml; do
 
   service_config_enable "$service_name" "${containers[@]}"
   caddy_add_service "$service_name"
+  configure_service "$service_name"
   msg_success "Enabled built-in service: $service_name"
 done
 
 echo ""
-msg_info "Run 'dcm service config' to complete the configuration."
+msg_info "Run 'dcm service enable' to enable your services, then 'dcm service up' to start them."
