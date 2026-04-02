@@ -42,12 +42,7 @@ echo ""
 
 # Create sources.official if not present
 if [ ! -f "$DCM_SOURCES_OFFICIAL" ]; then
-  cat > "$DCM_SOURCES_OFFICIAL" <<'EOF'
-# DCM Official Sources
-# This file is managed by DCM. Do not edit manually.
-# Add your own repositories with: dcm repo register <url>
-# Add third-party sources with:   dcm repo add-source <url>
-EOF
+  sources_write_official
   msg_success "sources.official created."
 fi
 

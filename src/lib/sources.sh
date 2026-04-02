@@ -1,5 +1,17 @@
 ## Source file management — manages state/sources/
 
+# Write (or overwrite) sources.official with the bundled content.
+# Called by both init and self-update to keep it in sync with the DCM version.
+sources_write_official() {
+  mkdir -p "$DCM_SOURCES_DIR"
+  cat > "$DCM_SOURCES_OFFICIAL" <<'EOF'
+# DCM Official Sources
+# This file is managed by DCM. Do not edit manually.
+# Add your own repositories with: dcm repo register <url>
+# Add third-party sources with:   dcm repo add-source <url>
+EOF
+}
+
 # Derive source name from file path
 sources_name_from_file() {
   local file

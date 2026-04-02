@@ -30,3 +30,9 @@ chmod +x "$TMP"
 mv "$TMP" "$SELF"
 
 msg_success "dcm updated to $latest."
+
+# Overwrite sources.official with the version bundled in the new binary
+if [ -d "$DCM_SOURCES_DIR" ]; then
+  sources_write_official
+  msg_success "sources.official updated."
+fi
