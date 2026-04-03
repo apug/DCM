@@ -20,7 +20,6 @@ configure_service() {
   # Look for config.sh in setup/ directory
   local config_script="$service_dir/setup/config.sh"
   if [ ! -f "$config_script" ]; then
-    echo "Warning: No config.sh found for service '$service_name' (expected at $config_script)"
     return 0
   fi
 
@@ -48,7 +47,6 @@ configure_service() {
   # Check if partial file was created
   local partial_file="$partial_dir/config.partial"
   if [ ! -f "$partial_file" ]; then
-    echo "Warning: Config script for '$service_name' did not create config.partial at $partial_file"
     return 0
   fi
 
