@@ -178,6 +178,44 @@ All snippets use `# BEGIN` / `# END` markers and are idempotent — running the 
 
 ---
 
+### `dcm completion`
+
+Outputs the shell completion script for bash or zsh. The shell is auto-detected from `$SHELL` if not specified.
+
+```bash
+# Print the completion script
+dcm completion bash
+dcm completion zsh
+
+# Install automatically to the appropriate directory
+dcm completion --install
+dcm completion bash --install
+dcm completion zsh --install
+```
+
+Completion is also installed automatically by `dcm init`.
+
+**Bash** — add to `~/.bashrc`:
+```bash
+source ~/.bash_completion.d/dcm
+```
+
+**Zsh** — add to `~/.zshrc`:
+```zsh
+fpath=(~/.zsh/completions $fpath)
+autoload -Uz compinit && compinit
+```
+
+Supports tab completion for:
+- Commands, subcommands and flags (static)
+- Repository names for `repo info`, `repo rm`, `repo pull`, `run` (dynamic)
+- Service names (`RepoName/ServiceName`) for `service enable` (dynamic)
+- Enabled service names for `service disable`, `up`, `down`, `restart`, `logs`, `shell`, `config` (dynamic)
+
+The `--dir`/`-d` flag is respected when resolving dynamic completions.
+
+---
+
 ### `dcm self-update`
 
 Updates the `dcm` executable to the latest released version and refreshes `sources.official`.

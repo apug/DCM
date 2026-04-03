@@ -162,6 +162,10 @@ commands:
             required: false
             repeatable: true
             help: Docker service names to restart (restarts all if not specified)
+        flags:
+          - long: --recreate
+            short: -r
+            help: Force container recreation (re-reads volumes, env, network config)
 
       - name: logs
         alias: l*
@@ -248,6 +252,18 @@ commands:
       - long: --list
         short: -l
         help: List available commands for the repo
+
+  - name: completion
+    help: Output shell completion script for bash or zsh
+    alias: comp
+    args:
+      - name: shell
+        required: false
+        help: "Shell type: bash or zsh (default: auto-detect from $SHELL)"
+    flags:
+      - long: --install
+        short: -i
+        help: Install the completion script to the appropriate directory
 
   - name: self-update
     help: Update dcm to the latest released version

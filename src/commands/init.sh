@@ -91,3 +91,20 @@ done
 
 echo ""
 msg_info "Run 'dcm service enable' to enable your services, then 'dcm service up' to start them."
+
+# Install shell completion based on current shell
+echo ""
+case "${SHELL##*/}" in
+  bash)
+    if "$0" completion --install bash &>/dev/null; then
+      msg_success "Bash completion installed (~/.bash_completion.d/dcm)"
+      msg_info "Add 'source ~/.bash_completion.d/dcm' to your ~/.bashrc to activate."
+    fi
+    ;;
+  zsh)
+    if "$0" completion --install zsh &>/dev/null; then
+      msg_success "Zsh completion installed (~/.zsh/completions/_dcm)"
+      msg_info "Ensure your ~/.zshrc has: fpath=(~/.zsh/completions \$fpath) && autoload -Uz compinit && compinit"
+    fi
+    ;;
+esac
