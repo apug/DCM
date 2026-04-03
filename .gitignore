@@ -3,5 +3,6 @@
 state/
 repos/
 dcm
+completions.bash
 compose.yml
 .brainstorming/
