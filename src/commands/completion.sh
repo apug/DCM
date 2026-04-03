@@ -62,10 +62,14 @@ _dcm_list_enabled_services() {
   local workdir="$1"
   local config="$workdir/state/config.ini"
   [ -f "$config" ] || return
-  grep '^\[' "$config" | tr -d '[]'
+  grep '\.enabled = true' "$config" | sed 's/\.enabled = true//'
 }
 
 _dcm() {
+  # Remove / from word break chars so RepoName/ServiceName completes as one token
+  local saved_wordbreaks="$COMP_WORDBREAKS"
+  COMP_WORDBREAKS="${COMP_WORDBREAKS//\//}"
+
   local cur prev
   cur="${COMP_WORDS[COMP_CWORD]}"
   prev="${COMP_WORDS[COMP_CWORD - 1]}"
@@ -241,6 +245,8 @@ _dcm() {
       COMPREPLY=($(compgen -W "--help -h" -- "$cur"))
       ;;
   esac
+
+  COMP_WORDBREAKS="$saved_wordbreaks"
 }
 
 complete -F _dcm dcm
@@ -289,7 +295,7 @@ _dcm_enabled_services() {
   local workdir config
   workdir="$(_dcm_resolve_workdir)"
   config="$workdir/state/config.ini"
-  [ -f "$config" ] && grep '^\[' "$config" | tr -d '[]'
+  [ -f "$config" ] && grep '\.enabled = true' "$config" | sed 's/\.enabled = true//'
 }
 
 _dcm() {
