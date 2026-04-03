@@ -55,6 +55,14 @@ commands:
             short: -a
             help: Show all repositories available in sources (installed + catalog)
 
+      - name: info
+        help: Show details about a repository
+        alias: [show, i*]
+        args:
+          - name: name
+            required: true
+            help: Repository name
+
       - name: update
         help: Fetch manifests from all sources and refresh the local index
 
