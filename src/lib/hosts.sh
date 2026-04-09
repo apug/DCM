@@ -6,6 +6,12 @@
 hosts_sync() {
   local caddyfile_services="$DCM_CONFIG_DIR/$DCM_PROXY_SERVICE/Caddyfile.Services"
 
+  # Load config.env to get CADDY_MAIN_DOMAIN and other user-defined variables
+  local config_env="$DCM_CONFIG_DIR/config.env"
+  if [ -f "$config_env" ]; then
+    set -a; source "$config_env"; set +a
+  fi
+
   # Extract unique domains from Caddyfile.Services
   local domains=()
   if [ -f "$caddyfile_services" ] && [ -n "$CADDY_MAIN_DOMAIN" ]; then
