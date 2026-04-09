@@ -28,7 +28,6 @@ commands:
 
       - name: rm
         help: Remove a repository from the repos directory
-        alias: d*
         args:
           - name: name
             required: true
@@ -57,7 +56,7 @@ commands:
 
       - name: info
         help: Show details about a repository
-        alias: [show, i*]
+        alias: show
         args:
           - name: name
             required: true
@@ -68,7 +67,6 @@ commands:
 
       - name: pull
         help: git pull on installed repositories
-        alias: u*
         args:
           - name: repos
             required: false
@@ -85,11 +83,10 @@ commands:
 
   - name: service
     help: Manage docker services
-    alias: [s, se*]
+    alias: s
     commands:
       - name: enable
         help: Enable services interactively or by name
-        alias: e*
         args:
           - name: services
             required: false
@@ -105,7 +102,6 @@ commands:
 
       - name: disable
         help: Disable services by removing them from services/compose/services.yml
-        alias: dis*
         args:
           - name: services
             required: false
@@ -118,7 +114,6 @@ commands:
 
       - name: config
         help: Configure services by executing their config.sh scripts and merging to services/config/config.env
-        alias: c*
         args:
           - name: services
             required: false
@@ -127,7 +122,6 @@ commands:
 
       - name: status
         help: Show status of services in tabular format
-        alias: st*
         flags:
           - long: --all
             short: -a
@@ -135,7 +129,6 @@ commands:
 
       - name: up
         help: Start all or specific services
-        alias: u*
         args:
           - name: services
             required: false
@@ -149,7 +142,6 @@ commands:
             help: Remove containers for services not defined in the compose file
 
       - name: down
-        alias: d*
         help: Stop all or specific services
         args:
           - name: services
@@ -158,7 +150,6 @@ commands:
             help: Docker service names to stop (stops all if not specified)
 
       - name: restart
-        alias: r*
         help: Restart all or specific services
         args:
           - name: services
@@ -171,7 +162,6 @@ commands:
             help: Force container recreation (re-reads volumes, env, network config)
 
       - name: logs
-        alias: l*
         help: Follow logs for specific services
         args:
           - name: services
@@ -181,7 +171,6 @@ commands:
 
       - name: shell
         help: Open bash shell in container
-        alias: sh*
         args:
           - name: container
             required: true
@@ -194,7 +183,6 @@ commands:
     commands:
       - name: add
         help: Add or update a user snippet in Caddyfile.Before or Caddyfile.After
-        alias: a*
         args:
           - name: name
             required: true
@@ -211,7 +199,6 @@ commands:
 
       - name: service-add
         help: Add or update a user-defined route snippet in Caddyfile.Services
-        alias: sa*
         args:
           - name: name
             required: true
