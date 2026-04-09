@@ -68,7 +68,7 @@ caddy_upsert_snippet() {
 
   # Remove existing block if present
   if grep -qF "# BEGIN $marker" "$target_file" 2>/dev/null; then
-    sed -i "/^# BEGIN $marker$/,/^# END $marker$/d" "$target_file"
+    sed -i "\|^# BEGIN $marker$|,\|^# END $marker$|d" "$target_file"
   fi
 
   {
@@ -88,5 +88,5 @@ caddy_remove_service() {
   [ -f "$caddyfile_services" ] || return 0
   grep -qF "# BEGIN $service_name" "$caddyfile_services" || return 0
 
-  sed -i "/^# BEGIN $service_name$/,/^# END $service_name$/d" "$caddyfile_services"
+  sed -i "\|^# BEGIN $service_name$|,\|^# END $service_name$|d" "$caddyfile_services"
 }
