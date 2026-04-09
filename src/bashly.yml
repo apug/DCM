@@ -85,7 +85,7 @@ commands:
 
   - name: service
     help: Manage docker services
-    alias: s*
+    alias: [s, se*]
     commands:
       - name: enable
         help: Enable services interactively or by name
