@@ -126,7 +126,7 @@ commands:
 
       - name: status
         help: Show status of services in tabular format
-        alias: s*
+        alias: st*
         flags:
           - long: --all
             short: -a
@@ -144,6 +144,8 @@ commands:
           - long: --build
             short: -b
             help: Rebuild images before starting (only affects services with a Dockerfile)
+          - long: --remove-orphans
+            help: Remove containers for services not defined in the compose file
 
       - name: down
         alias: d*
@@ -182,7 +184,7 @@ commands:
         args:
           - name: container
             required: true
-            help: Container name to open shell in
+            help: Container name or service name (e.g. php83 or DcmPhp/Php83)
 
   - name: caddy
     help: Manage Caddy reverse proxy configuration

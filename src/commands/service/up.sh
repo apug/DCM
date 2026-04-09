@@ -16,6 +16,9 @@ compose_cmd="docker compose up -d"
 if [[ "${args[--build]}" == "1" ]]; then
   compose_cmd="$compose_cmd --build"
 fi
+if [[ "${args[--remove-orphans]}" == "1" ]]; then
+  compose_cmd="$compose_cmd --remove-orphans"
+fi
 
 # Add specific services if provided
 if [ -n "${args[services]}" ]; then

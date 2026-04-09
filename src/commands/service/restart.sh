@@ -18,6 +18,7 @@ else
   compose_cmd="docker compose restart"
 fi
 
+
 # Add specific services if provided
 if [ -n "${args[services]}" ]; then
   eval "service_names=(${args[services]})"
