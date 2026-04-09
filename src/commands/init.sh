@@ -60,6 +60,17 @@ if [ ! -f "$DCM_SERVICES_FILE" ]; then
   echo "include:" > "$DCM_SERVICES_FILE"
 fi
 
+# Initialize hosts.yml if missing
+if [ ! -f "$DCM_HOSTS_FILE" ]; then
+  echo "services: {}" > "$DCM_HOSTS_FILE"
+fi
+
+# Ensure compose.yml includes hosts.yml (upgrade existing installations)
+if [ -f "compose.yml" ] && ! grep -qF "hosts.yml" compose.yml; then
+  sed -i 's|  - state/services/compose/services.yml|  - state/services/compose/services.yml\n  - state/services/compose/hosts.yml|' compose.yml
+  msg_success "compose.yml updated to include hosts.yml"
+fi
+
 echo ""
 msg_info "Enabling built-in services..."
 

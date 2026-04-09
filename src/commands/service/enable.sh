@@ -130,6 +130,7 @@ if [ -n "${args[services]}" ]; then
   done
   echo ""
   regenerate_config_env
+  hosts_sync
   msg_success "Summary: $enabled_count enabled, $failed_count failed"
 
 elif [ -n "${args[--all]}" ]; then
@@ -158,6 +159,7 @@ elif [ -n "${args[--all]}" ]; then
     echo ""
   done
   regenerate_config_env
+  hosts_sync
   msg_success "Summary: $enabled_count enabled, $disabled_count disabled"
 
 elif [ -n "${args[--yes]}" ]; then
@@ -178,6 +180,7 @@ elif [ -n "${args[--yes]}" ]; then
   done
   echo ""
   regenerate_config_env
+  hosts_sync
   msg_success "Summary: $enabled_count enabled, $failed_count failed"
 
 else
@@ -197,5 +200,6 @@ else
     echo ""
   done
   regenerate_config_env
+  hosts_sync
   msg_success "Summary: $enabled_count enabled"
 fi

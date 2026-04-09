@@ -25,6 +25,7 @@ services:
 
 include:
   - state/services/compose/services.yml
+  - state/services/compose/hosts.yml
 
 networks:
   db:

@@ -169,6 +169,9 @@ commands:
             repeatable: true
             help: Docker service names to show logs for
 
+      - name: sync-hosts
+        help: Regenerate hosts.yml with extra_hosts for all enabled containers
+
       - name: shell
         help: Open bash shell in container
         args:

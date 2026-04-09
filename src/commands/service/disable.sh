@@ -84,10 +84,11 @@ done
 
 echo ""
 
-# Regenerate config.env if any service was disabled
+# Regenerate config.env and hosts.yml if any service was disabled
 if [ $disabled_count -gt 0 ]; then
   echo "Regenerating configuration file..."
   regenerate_config_env
+  hosts_sync
   echo ""
 fi
 
