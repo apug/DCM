@@ -82,6 +82,7 @@ commands:
             required: true
             help: URL of the source file to download
 
+
   - name: service
     help: Manage docker services
     alias: s*
