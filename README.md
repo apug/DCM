@@ -74,6 +74,7 @@ dcm repo install <source>/<name>       # Install with explicit source (if name c
 dcm repo register <url> [--branch]     # Add a repo to sources.local and install it
 dcm repo add-source <url>              # Add an external source file to sources.d/
 dcm repo pull [repos...]               # git pull on installed repos (all or specific)
+dcm repo info <name>                   # Show details: status, URL, branch, services, last commit
 dcm repo rm <name>                     # Remove an installed repository
 ```
 
@@ -124,19 +125,23 @@ Use: dcm repo install official/DCMBase
 Manages Docker services discovered from `repos/*/services/*/compose.yml`.
 
 ```bash
-dcm service enable [services...]    # Enable services interactively or by name
-dcm service enable --all            # Prompt for all services (including enabled ones)
-dcm service enable --yes            # Non-interactive: enable all disabled services
-dcm service disable [services...]   # Disable specific services
-dcm service disable --all           # Disable all services
-dcm service config [services...]    # Run config.sh scripts and rebuild config.env
-dcm service status                  # Show enabled services and container state
-dcm service status --all            # Show all services including disabled
-dcm service up [services...]        # Start services
-dcm service down [services...]      # Stop services
-dcm service restart [services...]   # Restart services
-dcm service logs <services...>      # Follow service logs
-dcm service shell <container>       # Open a bash shell in a container
+dcm service enable [services...]                # Enable services interactively or by name
+dcm service enable --all                        # Prompt for all services (including enabled ones)
+dcm service enable --yes                        # Non-interactive: enable all disabled services
+dcm service disable [services...]               # Disable specific services
+dcm service disable --all                       # Disable all services
+dcm service config [services...]                # Run config.sh scripts and rebuild config.env
+dcm service status                              # Show enabled services and container state
+dcm service status --all                        # Show all services including disabled
+dcm service up [services...]                    # Start services
+dcm service up --remove-orphans [services...]   # Start services, removing orphaned containers
+dcm service down [services...]                  # Stop services
+dcm service restart [services...]               # Restart services
+dcm service restart --recreate [services...]    # Restart with --force-recreate
+dcm service logs <services...>                  # Follow service logs
+dcm service shell <container>                   # Open a bash/sh shell in a container
+dcm service shell <RepoName/ServiceName>        # Shell by service name (resolves first container)
+dcm service sync-hosts                          # Regenerate hosts.yml with extra_hosts for all containers
 ```
 
 Service names use the format `RepoName/ServiceName`:
@@ -145,6 +150,25 @@ dcm service enable MyInfra/Postgres MyInfra/Redis
 dcm service disable MyInfra/Redis
 dcm service logs Postgres
 ```
+
+---
+
+### `dcm run`
+
+Runs a command provided by an installed repository. Repositories can expose arbitrary scripts under their `commands/` directory, documented with a `# DESCRIPTION:` comment.
+
+```bash
+dcm run <repo> <command> [args...]   # Run a repo command
+dcm run <repo> --list                # List available commands for a repo
+```
+
+Examples:
+```bash
+dcm run DcmBase --list
+dcm run DcmBase db-dump mydb
+```
+
+A command script lives at `repos/<repo>/commands/<command>.sh` and receives DCM environment variables (`DCM_CONFIG_DIR`, `DCM_VOLUMES_DIR`, etc.) automatically.
 
 ---
 
@@ -252,7 +276,8 @@ my-project/
     │   └── cache/               # downloaded repo manifests (dcm.yml)
     └── services/
         ├── compose/
-        │   └── services.yml     # active service includes
+        │   ├── services.yml     # active service includes
+        │   └── hosts.yml        # generated extra_hosts for all containers
         ├── config/              # generated config per service
         └── volumes/             # persistent docker volumes
 ```
