@@ -44,7 +44,7 @@ msg_success "sources.official updated."
 
 # Download built-in services if missing
 if [ ! -d "$DCM_BUILTIN_SERVICES" ]; then
-  DCM_VERSION=$("$0" --version)
+  DCM_VERSION=$("$DCM_SELF" --version)
   SERVICES_URL="https://github.com/$DCM_GITHUB_REPO/releases/download/$DCM_VERSION/services.tgz"
   msg_info "Built-in services not found. Downloading $DCM_VERSION..."
   if ! curl -fsSL "$SERVICES_URL" | tar -xz; then
@@ -105,13 +105,13 @@ msg_info "Run 'dcm service enable' to enable your services, then 'dcm service up
 echo ""
 case "${SHELL##*/}" in
   bash)
-    if "$0" completion --install bash &>/dev/null; then
+    if "$DCM_SELF" completion --install bash &>/dev/null; then
       msg_success "Bash completion installed (~/.bash_completion.d/dcm)"
       msg_info "Add 'source ~/.bash_completion.d/dcm' to your ~/.bashrc to activate."
     fi
     ;;
   zsh)
-    if "$0" completion --install zsh &>/dev/null; then
+    if "$DCM_SELF" completion --install zsh &>/dev/null; then
       msg_success "Zsh completion installed (~/.zsh/completions/_dcm)"
       msg_info "Ensure your ~/.zshrc has: fpath=(~/.zsh/completions \$fpath) && autoload -Uz compinit && compinit"
     fi

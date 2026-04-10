@@ -52,7 +52,7 @@ eval "cmd_args=(${args[args]:-})"
 # Export DCM context for the repo script
 export REPO_NAME="$repo"
 export DCM_REPOS_DIR="$PWD/repos"
-export DCM_BIN="$(readlink -f "$0")"
+export DCM_BIN="$DCM_SELF"
 # Export current workdir so child $DCM_BIN calls use the same project
 export DCM_CONFIG="$PWD"
 
