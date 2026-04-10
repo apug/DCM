@@ -119,6 +119,8 @@ fi
 echo ""
 msg_info "Enabling built-in services..."
 
+caddy_init_files
+
 for compose_file in $DCM_BUILTIN_SERVICES/*/compose.yml; do
   [ -f "$compose_file" ] || continue
   service=$(basename "$(dirname "$compose_file")")
@@ -142,6 +144,8 @@ for compose_file in $DCM_BUILTIN_SERVICES/*/compose.yml; do
   configure_service "$service_name"
   msg_success "Enabled built-in service: $service_name"
 done
+
+regenerate_config_env
 
 echo ""
 msg_info "Run 'dcm service enable' to enable your services, then 'dcm service up' to start them."
