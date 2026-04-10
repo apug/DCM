@@ -11,6 +11,9 @@ if [ -f ".env" ]; then
   set +a
 fi
 
+# Ensure Caddy config files exist before Docker tries to bind-mount them
+caddy_init_files
+
 # Build docker compose command
 compose_cmd="docker compose up -d"
 if [[ "${args[--build]}" == "1" ]]; then
