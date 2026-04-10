@@ -45,14 +45,59 @@ msg_success "sources.official updated."
 # Download built-in services if missing
 if [ ! -d "$DCM_BUILTIN_SERVICES" ]; then
   DCM_VERSION=$("$DCM_SELF" --version)
-  SERVICES_URL="https://github.com/$DCM_GITHUB_REPO/releases/download/$DCM_VERSION/services.tgz"
-  msg_info "Built-in services not found. Downloading $DCM_VERSION..."
-  if ! curl -fsSL "$SERVICES_URL" | tar -xz; then
-    msg_error "Failed to download services from $SERVICES_URL"
-    exit 1
+  if [[ "$DCM_VERSION" =~ ^v?[0-9]+\.[0-9]+ ]]; then
+    SERVICES_URL="https://github.com/$DCM_GITHUB_REPO/releases/download/$DCM_VERSION/services.tgz"
+    msg_info "Built-in services not found. Downloading $DCM_VERSION..."
+    if ! curl -fsSL "$SERVICES_URL" | tar -xz; then
+      msg_error "Failed to download services from $SERVICES_URL"
+      exit 1
+    fi
+    msg_success "Built-in services downloaded."
+    echo ""
+  else
+    _local_services="$(dirname "$DCM_SELF")/services"
+    msg_warning "Built-in services not found (running non-release version: $DCM_VERSION)."
+    echo ""
+    if [ -d "$_local_services" ]; then
+      echo "Options:"
+      echo "  [L] Use local services/ from $(dirname "$DCM_SELF")"
+      echo "  [D] Download latest release from GitHub"
+      echo "  [S] Skip (you will need to provide services manually)"
+      echo ""
+      read -rp "Choice [L/d/s]: " _choice
+      _choice="${_choice:-L}"
+    else
+      echo "Options:"
+      echo "  [D] Download latest release from GitHub"
+      echo "  [S] Skip (you will need to provide services manually)"
+      echo ""
+      read -rp "Choice [D/s]: " _choice
+      _choice="${_choice:-D}"
+    fi
+
+    case "${_choice^^}" in
+      L)
+        cp -r "$_local_services" .
+        msg_success "Built-in services copied from local source."
+        echo ""
+        ;;
+      D)
+        LATEST_URL="https://github.com/$DCM_GITHUB_REPO/releases/latest/download/services.tgz"
+        msg_info "Downloading latest release..."
+        if ! curl -fsSL "$LATEST_URL" | tar -xz; then
+          msg_error "Failed to download services from $LATEST_URL"
+          exit 1
+        fi
+        msg_success "Built-in services downloaded."
+        echo ""
+        ;;
+      *)
+        msg_warning "Skipping. Built-in services will be missing until you run 'dcm init' again."
+        echo ""
+        ;;
+    esac
+    unset _local_services _choice
   fi
-  msg_success "Built-in services downloaded."
-  echo ""
 fi
 
 # Initialize services.yml and auto-enable all built-in services
