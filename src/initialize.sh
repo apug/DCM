@@ -27,6 +27,9 @@ declare -g DCM_SELF
 DCM_SELF=$(realpath "$0")
 
 mkdir -p "$_dcm_workdir"
+# Convert to absolute path so nested dcm invocations (e.g. "dcm completion --install"
+# called from within "dcm init") resolve the same directory regardless of cwd at call time.
+_dcm_workdir="$(cd "$_dcm_workdir" && pwd)"
 cd "$_dcm_workdir" || { printf "Error: cannot change to directory '%s'\n" "$_dcm_workdir" >&2; exit 1; }
 unset _dcm_workdir
 
