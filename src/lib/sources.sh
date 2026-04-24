@@ -15,6 +15,9 @@ sources_write_official() {
 
 - name: DcmPhp
   url: git@github.com:apug/DcmPhp.git
+
+- name: DcmSpid
+  url: git@github.com:apug/DcmSpid.git
 EOF
 }
 
