@@ -212,6 +212,10 @@ commands:
             arg: file
             help: Read snippet from file instead of opening editor
 
+      - name: list
+        alias: ls
+        help: List all sites and snippets configured in Caddy
+
       - name: reverse-proxy
         alias: rp
         help: Add a reverse proxy route to Caddyfile.Before or Caddyfile.After
