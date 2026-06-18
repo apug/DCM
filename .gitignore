@@ -7,3 +7,4 @@ completions.bash
 compose.yml
 .brainstorming/
 .omx/
+.claude/

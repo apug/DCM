@@ -16,7 +16,19 @@ _dcm_resolve_workdir() {
       --dir|-d) skip_next=true ;;
     esac
   done
-  echo "${DCM_CONFIG:-${HOME}/.local/share/dcm}"
+
+  if [ -n "${DCM_CONFIG:-}" ]; then
+    echo "$DCM_CONFIG"
+    return
+  fi
+
+  # Use CWD if it looks like a DCM project (has a .env with DCM_ROOT)
+  if grep -qs "^DCM_ROOT=" "$PWD/.env" 2>/dev/null; then
+    echo "$PWD"
+    return
+  fi
+
+  echo "${HOME}/.local/share/dcm"
 }
 
 _dcm_workdir="$(_dcm_resolve_workdir)"

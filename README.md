@@ -39,6 +39,21 @@ curl -fsSL https://raw.githubusercontent.com/apug/DCM/main/install.sh | bash
 
 ---
 
+## Working directory
+
+DCM resolves its working directory at startup using the following priority:
+
+| Priority | Source | Description |
+|---|---|---|
+| 1 | `--dir <path>` / `-d <path>` | Explicit flag passed to any command |
+| 2 | `DCM_CONFIG` env var | Set in your shell environment |
+| 3 | Current directory | Used if it contains a `.env` with `DCM_ROOT=` (i.e. already initialized with `dcm init`) |
+| 4 | `~/.local/share/dcm` | Global default |
+
+This means you can `cd` into any initialized DCM project and run `dcm` without flags or env vars — the right directory is picked up automatically.
+
+---
+
 ## Commands
 
 ### `dcm init`
