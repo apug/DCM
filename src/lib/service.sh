@@ -30,10 +30,11 @@ configure_service() {
   local partial_dir="$DCM_CONFIG_DIR/$repo/$service"
   mkdir -p "$partial_dir"
 
-  # Export REPO_NAME and SERVICE_NAME for the config script to use
+  # Export context variables for the config script to use
   export REPO_NAME="$repo"
   export SERVICE_NAME="$service"
   export SERVICE_CONFIG_DIR="$partial_dir"
+  export DCM_CONFIG_DIR
 
   # Execute the config script
   if ! bash "$config_script"; then
