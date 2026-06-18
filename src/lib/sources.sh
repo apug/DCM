@@ -12,12 +12,6 @@ sources_write_official() {
 
 - name: DcmBase
   url: git@github.com:apug/DcmBase.git
-
-- name: DcmPhp
-  url: git@github.com:apug/DcmPhp.git
-
-- name: DcmSpid
-  url: git@github.com:apug/DcmSpid.git
 EOF
 }
 

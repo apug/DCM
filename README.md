@@ -58,16 +58,20 @@ This means you can `cd` into any initialized DCM project and run `dcm` without f
 
 ### `dcm init`
 
-Initializes the project structure in the current directory:
-- Creates `state/` with config, volumes, compose, and sources directories
-- Writes `.env` with absolute paths and current UID/GID
-- Downloads built-in `services/` from GitHub if not present
-- Auto-enables built-in services (e.g. Caddy reverse proxy)
-- Creates `state/sources/sources.official` with the bundled official catalog
+Initializes the DCM project structure in the resolved working directory (see [Working directory](#working-directory) above). To initialize in a specific path, use `--dir`:
 
 ```bash
-dcm init
+dcm init                        # initializes in ~/.local/share/dcm (default)
+dcm init --dir ~/my-project     # initializes in ~/my-project
+DCM_CONFIG=~/my-project dcm init
 ```
+
+What it creates:
+- `state/` with config, volumes, compose, and sources directories
+- `.env` with absolute paths and current UID/GID
+- Built-in `services/` downloaded from GitHub if not present
+- Built-in services auto-enabled (e.g. Caddy reverse proxy)
+- `state/sources/sources.official` with the bundled official catalog
 
 ---
 

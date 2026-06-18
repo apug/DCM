@@ -39,20 +39,39 @@ curl -fsSL https://raw.githubusercontent.com/apug/DCM/main/install.sh | bash
 
 ---
 
+## Directory di lavoro
+
+DCM risolve la directory di lavoro all'avvio secondo questa priorità:
+
+| Priorità | Sorgente | Descrizione |
+|---|---|---|
+| 1 | `--dir <path>` / `-d <path>` | Flag esplicito passato a qualsiasi comando |
+| 2 | Variabile `DCM_CONFIG` | Impostata nell'ambiente shell |
+| 3 | Directory corrente | Usata se contiene un `.env` con `DCM_ROOT=` (già inizializzata con `dcm init`) |
+| 4 | `~/.local/share/dcm` | Default globale |
+
+Questo significa che puoi entrare in qualsiasi progetto DCM con `cd` e lanciare `dcm` senza flag o variabili — la directory giusta viene rilevata automaticamente.
+
+---
+
 ## Comandi
 
 ### `dcm init`
 
-Inizializza la struttura del progetto nella directory corrente:
-- Crea `state/` con le directory di configurazione, volumi, compose e sources
-- Scrive `.env` con i percorsi assoluti e l'UID/GID corrente
-- Scarica i servizi built-in `services/` da GitHub se non presenti
-- Abilita automaticamente i servizi built-in (es. reverse proxy Caddy)
-- Crea `state/sources/sources.official` con il catalogo ufficiale incluso in DCM
+Inizializza la struttura DCM nella directory di lavoro risolta (vedi [Directory di lavoro](#directory-di-lavoro) sopra). Per inizializzare in un percorso specifico, usa `--dir`:
 
 ```bash
-dcm init
+dcm init                         # inizializza in ~/.local/share/dcm (default)
+dcm init --dir ~/mio-progetto    # inizializza in ~/mio-progetto
+DCM_CONFIG=~/mio-progetto dcm init
 ```
+
+Cosa crea:
+- `state/` con le directory di configurazione, volumi, compose e sources
+- `.env` con i percorsi assoluti e l'UID/GID corrente
+- Servizi built-in `services/` scaricati da GitHub se non presenti
+- Servizi built-in abilitati automaticamente (es. reverse proxy Caddy)
+- `state/sources/sources.official` con il catalogo ufficiale incluso in DCM
 
 ---
 
